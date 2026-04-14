@@ -8,6 +8,8 @@ plugins {
 group = "ru.digit-verse"
 version = "1.0.0-alpha01"
 
+val github = "github.com/ShivaMultiarmed/Quantum-Computing"
+
 publishing {
     publications {
         create<MavenPublication>("maven") {
@@ -16,10 +18,12 @@ publishing {
             artifactId = "quantum-computing"
             version = "1.0.0-alpha01"
             description = "A library for simulating quantum computing concepts."
+
             pom {
                 name.set("Quantum Computing")
+                inceptionYear.set("2026")
                 description.set("A library to simulate quantum computing concepts.")
-                url.set("") // TODO
+                url.set("https://$github")
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")
@@ -34,7 +38,6 @@ publishing {
                     }
                 }
                 scm {
-                    val github = "github.com/mikhail-shell/quantum-computing" // TODO
                     connection.set("scm:git:git://$github.git")
                     developerConnection.set("scm:git:ssh://$github.git")
                     url.set("https://$github")
@@ -44,13 +47,17 @@ publishing {
     }
 
     repositories {
-        maven {
+        mavenCentral {
             name = "QuantumComputing"
-            url = uri(layout.buildDirectory.dir("repo"))
+            url = uri("https://central.sonatype.com/api/v1/publisher/deployment/05cdf1aa-7b4a-4165-b7fd-d3b819bd1086")
             credentials {
                 username = project.findProperty("maven.central.userName")?.toString() ?: ""
                 password = project.findProperty("maven.central.password")?.toString() ?: ""
             }
+        }
+        mavenLocal {
+            name = "QuantumComputing"
+            url = uri("${System.getProperty("user.home")}/.m2/repository")
         }
     }
 }
@@ -63,6 +70,11 @@ signing {
 
 repositories {
     mavenCentral()
+    mavenLocal {
+        val releasesRepoUrl = uri(layout.buildDirectory.dir("repos/releases"))
+        val snapshotsRepoUrl = uri(layout.buildDirectory.dir("repos/snapshots"))
+        url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+    }
 }
 
 dependencies {

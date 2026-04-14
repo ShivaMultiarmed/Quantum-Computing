@@ -55,7 +55,7 @@ class Observer {
         b = 1.0 - a
 
         val q = Qubit(1.0, a, b)
-        val result = Integer.toBinaryString(observe(q)).first() // Assuming observe returns 0 or 1
+        val result = observe(q).toString(2).first()
 
         var c = 0.0
         for (i in register.matrix.indices) {
