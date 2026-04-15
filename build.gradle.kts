@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "ru.digit-verse"
-version = "1.0.0-alpha01"
+version = "1.0.0"
 
 val github = "github.com/ShivaMultiarmed/Quantum-Computing"
 
@@ -16,7 +16,7 @@ publishing {
             from(components["java"])
             group = "ru.digit-verse"
             artifactId = "quantum-computing"
-            version = "1.0.0-alpha01"
+            version = "1.0.0"
             description = "A library for simulating quantum computing concepts."
 
             pom {
@@ -81,7 +81,6 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks.test {

@@ -1,32 +1,29 @@
 package ru.digitverse.quantum.computing
 
 import kotlin.math.log
+import kotlin.math.pow
+import kotlin.math.sqrt
 
+/**
+ * A class that represents a register.
+ *
+ * @author Mikhail Shell
+ * @since 1.0.0
+ */
 open class Register(
-    K: Double,
-    V: DoubleArray
-) : Vector(K, V) {
+    coefficient: Double,
+    register: DoubleArray
+) : Vector(coefficient, register) {
     init {
-        require(checkPower(V)) {
+        require(checkPower(register.size)) {
             "Register's size must be of the power of 2"
         }
     }
 
-    private fun checkPower(V: DoubleArray): Boolean {
-        var indicator = V.size.toDouble() // indicates if the array size is of power of 2
-        while (indicator > 1) {
-            indicator /= 2
-            if (indicator != indicator.toInt().toDouble()) { // not integer
-                return false
-            }
-        }
-        return true
-    }
-
     override fun toString(): String {
         return buildString {
-            if (coefficient != 1.0) {
-                append(coefficient)
+            if (this@Register.coefficient != 1.0) {
+                append(this@Register.coefficient)
                 append("(")
             }
             for (i in matrix.indices) {
@@ -50,17 +47,44 @@ open class Register(
                     }
 
                     append("|")
-                    append(intToBinaryString(i, qubitsNumber()))
+                    append(i.toBinary(qubitsNumber()))
                     append(">")
                 }
             }
-            if (coefficient != 1.0) {
+            if (this@Register.coefficient != 1.0) {
                 append(")")
             }
         }
     }
 
+    operator fun get(index: Int): Qubit {
+        val qubitCount = qubitsNumber()
+        if (index !in 0 until qubitCount) {
+            throw IndexOutOfBoundsException("Invalid Qubit's index.")
+        }
+        val binaryRegisterStates = matrix.mapIndexed { i, row ->
+            i to row[0]
+        }.filter { (_, x) ->
+            x > 0.0
+        }.map { (i, _) ->
+            i.toBinary(qubitCount)
+        }
+        val a = sqrt(binaryRegisterStates.count { it[index] == '0' }.toDouble()/ binaryRegisterStates.size)
+        val b = sqrt(1 - a.pow(2))
+        return Qubit(1.0, a, b)
+    }
+
+    /**
+     * Factory methods to create [Register] instances.
+     */
     companion object Factory {
+        fun from(vararg qubits: Qubit): Register {
+            var register = qubits[0].toRegister()
+            for (i in 1 until qubits.size) {
+                register = register.tensor(qubits[i]).toRegister()
+            }
+            return register
+        }
         fun from(string: String): Register {
             val coeffRegex = """^([\d.]+)""".toRegex()
             val k = coeffRegex.find(string)?.groupValues?.get(1)?.toDouble() ?: 1.0
@@ -87,4 +111,40 @@ open class Register(
     }
 }
 
+/**
+ * @receiver A checked register
+ * @return The count of qubits inside the register
+ */
 fun Register.qubitsNumber(): Int = log(matrix.size.toDouble(), 2.0).toInt()
+
+fun Matrix.toRegister(): Register {
+    require(matrix[0].size == 1 && checkPower(matrix.size)) {
+        "Matrix must have one column to be convertable to a vector"
+    }
+    return Register(coefficient, DoubleArray(matrix.size){ i -> matrix[i][0] })
+}
+
+/**
+ * @param array The tested array.
+ * @return true if the provided array is of size of power of 2 and false otherwise
+ */
+private fun checkPower(size: Int): Boolean {
+    var indicator = size.toDouble() // indicates if the array size is of power of 2
+    while (indicator > 1) {
+        indicator /= 2
+        if (indicator != indicator.toInt().toDouble()) { // not integer
+            return false
+        }
+    }
+    return true
+}
+
+operator fun Matrix.times(other: Register): Register = Register(
+    coefficient = coefficient * other.coefficient,
+    register = (matrix * other.matrix).toVector()
+)
+
+fun Register.tensor(other: Register): Register = Register(
+    coefficient = coefficient * other.coefficient,
+    register = matrix.tensor(other.matrix).toVector()
+)

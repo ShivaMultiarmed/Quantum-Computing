@@ -5,8 +5,20 @@ import kotlin.math.sqrt
 import kotlin.random.Random
 import kotlin.time.Clock
 
+/**
+ * Observer of single [Qubit]s and [Qubit]s in [Register]s.
+ *
+ * @author Mikhail Shell
+ * @since 1.0.0
+ */
 class Observer {
     private val random = Random(Clock.System.now().toEpochMilliseconds())
+
+    /**
+     * Observes a [Qubit] and make it collapse into one of classic states: 1 or 0.
+     * @param qubit A qubit to observe. This instance changes its internal states of coefficient and matrix
+     * @return Classic state of a [Qubit]: 1 or 0
+     */
     fun observe(qubit: Qubit): Int {
         val a = qubit.coefficient * qubit.matrix[0][0]
         val p = a.pow(2.0) // Probability of zero
@@ -16,12 +28,23 @@ class Observer {
         qubit.coefficient = 1.0
         return if (qubit.matrix[0][0] == 0.0) 1 else 0
     }
-    fun observeH(qubit: Qubit): Int {
+
+    /**
+     * Observes a [Qubit] and make it collapse into one of classic states: 1 or 0 but does it with axes' rotation.
+     * @param qubit A qubit to observe. This instance changes its internal states of coefficient and matrix
+     * @return Classic state of a [Qubit]: 1 or 0
+     */
+    fun observeWithRotation(qubit: Qubit): Int {
         val qubitTransformed = (Matrix.hadamard() * qubit).toQubit()
         qubit.coefficient = qubitTransformed.coefficient
         qubit.matrix = qubitTransformed.matrix
         return observe(qubit)
     }
+
+    /**
+     * Observes a [Register] and make it collapse into one of possible classic states.
+     * @param register A [Register] to observe. This instance changes its internal states of coefficient and matrix
+     */
     fun observe(register: Register) {
         val percent = random.nextDouble()
         var minPercent: Double
@@ -39,6 +62,12 @@ class Observer {
         }
         register.coefficient = 1.0
     }
+
+    /**
+     * Observes a [Register] and make one of its [Qubit]s collapse into one of classic states.
+     * @param register A [Register] to observe. This instance changes its internal states of coefficient and matrix
+     * @param index A zero-based index of a [Qubit] in the [Register]
+     */
     fun observeQubitInRegister(register: Register, index: Int) {
         var a = 0.0
         var b = 0.0
@@ -46,7 +75,7 @@ class Observer {
 
         for (i in register.matrix.indices) {
             if (register.matrix[i][0] != 0.0) {
-                val qubitString = intToBinaryString(i, qNum);
+                val qubitString = i.toBinary(qNum)
                 if (qubitString[index] == '0') b++ else a++
             }
         }
@@ -60,7 +89,7 @@ class Observer {
         var c = 0.0
         for (i in register.matrix.indices) {
             if (register.matrix[i][0] != 0.0) {
-                val qubitString = intToBinaryString(i, qNum)
+                val qubitString = i.toBinary(qNum)
                 if (qubitString[index] == result) {
                     c++
                 } else {

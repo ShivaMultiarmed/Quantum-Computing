@@ -4,14 +4,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.math.sqrt
 
-
 class QubitTests {
     @Test
     fun qubitToRegister1() {
         val qubit1 = Qubit(1.0, 1.0, 0.0)
         val qubit2 = Qubit(1.0, 1.0, 0.0)
-        val expected = Vector(1.0, doubleArrayOf(1.0, 0.0, 0.0, 0.0))
-        val real = qubit1.tensor(qubit2).toVector()
+        val expected = Register(1.0, doubleArrayOf(1.0, 0.0, 0.0, 0.0))
+        val real = qubit1.tensor(qubit2)
         assertEquals(expected, real)
     }
 
@@ -19,8 +18,8 @@ class QubitTests {
     fun qubitToRegister2() {
         val qubit1 = Qubit(1 / sqrt(2.0), 1.0, 1.0)
         val qubit2 = Qubit(1.0, 1.0, 0.0)
-        val expected = Vector(1 / sqrt(2.0), doubleArrayOf(1.0, 0.0, 1.0, 0.0))
-        val real = qubit1.tensor(qubit2).toVector()
+        val expected = Register(1 / sqrt(2.0), doubleArrayOf(1.0, 0.0, 1.0, 0.0))
+        val real = qubit1.tensor(qubit2)
         assertEquals(expected, real)
     }
 
@@ -29,7 +28,7 @@ class QubitTests {
         val q = Qubit.zero()
         val h = Matrix.hadamard()
         val expected = Qubit.superPosPlus()
-        val real = (h * q).toQubit()
+        val real = h * q
         assertEquals(expected, real)
     }
 

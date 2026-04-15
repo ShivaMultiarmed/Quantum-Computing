@@ -31,4 +31,21 @@ class RegisterOperationTests {
         val expected = Register(0.577, doubleArrayOf(0.0, -1.0, -1.0, 1.0))
         Assertions.assertEquals(expected, real)
     }
+
+    @Test
+    fun testGettingQubitFromRegister1() {
+        val register = Register(1 / sqrt(3.0), doubleArrayOf(1.0, 1.0, 0.0, 1.0))
+        val expected = Qubit(1.0, 1 / sqrt(3.0), sqrt(2.0 / 3.0))
+        val real = register[1]
+        Assertions.assertEquals(expected, real)
+    }
+
+    @Test
+    fun testGettingQubitFromRegister2() {
+        val register = Register(1 / sqrt(2.0), doubleArrayOf(1.0, 0.0, 0.0, 1.0))
+        val expected = Qubit(1.0, 1 / sqrt(2.0), 1 / sqrt(2.0))
+        val real = register[0]
+        Assertions.assertEquals(expected, real)
+    }
+
 }
